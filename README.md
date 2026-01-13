@@ -472,7 +472,7 @@ git commit -m "Add new model"
 # Ruff................................................Failed  # ← Code needs fixing
 # - hook id: ruff
 # - exit code: 1
-# 
+#
 # Found 3 errors:
 # - apps/myapp/models.py:10:5: F401 'datetime' imported but unused
 # - apps/myapp/models.py:15:80: E501 line too long (95 > 100)
@@ -568,7 +568,7 @@ Add your own checks:
         entry: bash -c 'test -f .env || (echo ".env file missing!" && exit 1)'
         language: system
         pass_filenames: false
-      
+
       - id: run-security-check
         name: Security Check
         entry: bandit -r src/apps/
@@ -598,7 +598,7 @@ pre-commit install
 #### "hook failed" errors
 
 **Problem**: Code doesn't meet standards
-**Solution**: 
+**Solution**:
 1. Review the error message
 2. Fix the code manually
 3. Or let pre-commit auto-fix with `--fix`
@@ -608,7 +608,7 @@ pre-commit install
 #### Hooks are slow
 
 **Problem**: Pre-commit takes too long
-**Solution**: 
+**Solution**:
 - Run only on changed files (default)
 - Skip mypy for faster commits:
   ```bash
@@ -699,13 +699,13 @@ If you need to use custom migration directories (e.g., for different environment
 MIGRATION_MODULES = {
     # Register custom migration modules here
     # Format: "app_name": "path.to.custom.migrations"
-    
+
     # Example 1: Custom migrations directory
     "myapp": "apps.myapp.migrations_custom",
-    
+
     # Example 2: Separate migrations for different environments
     "orders": "apps.orders.migrations_production",
-    
+
     # Example 3: Disable migrations for specific app (useful for testing)
     "third_party_app": None,
 }
@@ -731,7 +731,7 @@ MIGRATION_MODULES = {
 2. **Environment-Specific Migrations:**
    ```python
    import os
-   
+
    if os.getenv("ENVIRONMENT") == "production":
        MIGRATION_MODULES = {
            "myapp": "apps.myapp.migrations_production",

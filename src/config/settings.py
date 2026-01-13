@@ -1,7 +1,7 @@
+from datetime import timedelta
 from pathlib import Path
 
 from decouple import Csv, config
-
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 ROOT_DIR = BASE_DIR.parent
@@ -20,12 +20,10 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-
     "rest_framework",
     "rest_framework_simplejwt",
     "django_filters",
     "drf_spectacular",
-
 ]
 
 MIDDLEWARE = [
@@ -110,7 +108,7 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # Custom migration modules
 # Register custom migration directories for apps if needed
-MIGRATION_MODULES = {
+MIGRATION_MODULES: dict[str, str] = {
     # Example: "app_name": "app_name.migrations_custom",
     # This allows you to:
     # - Use custom migration directories
@@ -157,8 +155,6 @@ SPECTACULAR_SETTINGS = {
 }
 
 # JWT Settings
-from datetime import timedelta
-
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(
         minutes=config("JWT_ACCESS_TOKEN_LIFETIME_MINUTES", default=60, cast=int)
