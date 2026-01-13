@@ -1,0 +1,46 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-added-large-files
+        args: ['--maxkb=1000']
+      - id: check-json
+      - id: check-toml
+      - id: check-merge-conflict
+      - id: debug-statements
+      - id: mixed-line-ending
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.1.15
+    hooks:
+      - id: ruff
+        args: [--fix, --exit-non-zero-on-fix]
+      - id: ruff-format
+
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.8.0
+    hooks:
+      - id: mypy
+        additional_dependencies: [django-stubs, djangorestframework-stubs]
+        args: [--ignore-missing-imports, --no-strict-optional]
+        exclude: ^(migrations/|tests/)
+
+  - repo: local
+    hooks:
+      - id: django-check
+        name: Django System Check
+        entry: python src/manage.py check
+        language: system
+        pass_filenames: false
+        always_run: true
+
+      - id: django-check-migrations
+        name: Check for missing migrations
+        entry: python src/manage.py makemigrations --check --dry-run
+        language: system
+        pass_filenames: false
+        always_run: true
+        files: models\.py$
