@@ -4,51 +4,31 @@ __pycache__/
 *$py.class
 *.so
 .Python
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
 *.egg-info/
-.installed.cfg
+dist/
+build/
 *.egg
-MANIFEST
 
-# Virtual Environment
-.venv/
+# Virtual environments
 venv/
-ENV/
 env/
+ENV/
+.venv
 
 # Django
 *.log
-local_settings.py
 db.sqlite3
 db.sqlite3-journal
 /staticfiles/
 /media/
-.static_storage/
-.media/
+*.pot
 
-# uv
-uv.lock
+# Environment
+.env
+.env.local
+.env.*.local
 
-# Testing
-.pytest_cache/
-.coverage
-htmlcov/
-.tox/
-coverage.xml
-*.cover
-
-# IDEs
+# IDE
 .vscode/
 .idea/
 *.swp
@@ -56,8 +36,24 @@ coverage.xml
 *~
 .DS_Store
 
-# Environment
-.env
+# Git
+.git/
+.gitignore
 
-# Pre-commit
-.pre-commit-config.yaml.backup
+# Testing
+.coverage
+htmlcov/
+.pytest_cache/
+.tox/
+
+# Documentation
+*.md
+docs/
+
+# CI/CD
+.github/
+.gitlab-ci.yml
+
+# Others
+*.bak
+*.tmp
