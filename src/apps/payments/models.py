@@ -66,13 +66,13 @@ class Payment(models.Model):
     """
     Model for tracking members billing profiles
     """
-    class StripeCustomer(models.Model):
-        user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-        stripe_customer_id = models.CharField(
-            max_length=255,
-            unique=True,
-        )
+class StripeCustomer(models.Model):
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    stripe_customer_id = models.CharField(
+        max_length=255,
+        unique=True,
+    )
 
-        def __str__(self):
-            return f"Stripe Customer ID: {self.stripe_customer_id}"
+    def __str__(self):
+        return f"Stripe Customer ID: {self.stripe_customer_id}"
 
