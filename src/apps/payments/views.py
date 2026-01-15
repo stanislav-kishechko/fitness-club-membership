@@ -1,27 +1,36 @@
 import stripe, json
 
 from django.views.decorators.csrf import csrf_exempt
-from redis.http.http_client import HttpResponse
+from django.http import HttpResponse
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
+from django.contrib.auth import get_user_model
 
 from .serializers import PaymentCreateSerializer
 from .models import Payment
 from .stripe_helper import create_checkout_session
+from apps.plans.models import MembershipPlan
 
 class StripeCheckoutView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [] #TODO: need to change to auth
 
     def post(self, request):
         serializer = PaymentCreateSerializer(data=request.data)
 
         if serializer.is_valid():
+            membership_id = serializer.data["membership_id"]
+            plan = MembershipPlan.objects.filter(id=membership_id).first()
+
+            if not plan:
+                return Response({"error":"Plan not found"}, status=status.HTTP_404_NOT_FOUND)
+            User = get_user_model() #TODO: need to del this in prod
+            first_user = User.objects.first() #TODO: need to del this in prod
             payment = Payment.objects.create(
-                user=request.user,
+                user = first_user,#TODO:user=request.user
                 membership_id=serializer.data["membership_id"],
-                money_to_pay=50, # тимчасово статична ціна
+                money_to_pay=plan.price, # тимчасово статична ціна
                 type=Payment.TypeChoices.MEMBERSHIP_PURCHASE,
             )
 
