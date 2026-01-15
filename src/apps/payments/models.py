@@ -16,8 +16,14 @@ class Payment(models.Model):
         MEMBERSHIP_PURCHASE = "MEMBERSHIP_PURCHASE", "Membership Purchase"
         UPGRADE_FEE = "UPGRADE_FEE", "Upgrade Fee"
 
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="payments",
+    )
+
     status = models.CharField(
-        max_length=10,
+        max_length=50,
         choices=StatusChoices.choices,
         default=StatusChoices.PENDING,
     )
