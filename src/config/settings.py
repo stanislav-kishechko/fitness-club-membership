@@ -24,7 +24,7 @@ INSTALLED_APPS = [
     "rest_framework_simplejwt",
     "django_filters",
     "drf_spectacular",
-    "apps.plans"
+    "apps.plans",
     "apps.payments",
 ]
 
@@ -62,12 +62,12 @@ WSGI_APPLICATION = "config.wsgi.application"
 # Database
 DATABASES = {
     "default": {
-        "ENGINE": config("DB_ENGINE", default="django.db.backends.postgresql"),
-        "NAME": config("DB_NAME", default="django_db"),
-        "USER": config("DB_USER", default="django_user"),
-        "PASSWORD": config("DB_PASSWORD", default="django_password"),
-        "HOST": config("DB_HOST", default="localhost"),
-        "PORT": config("DB_PORT", default="5432"),
+        "ENGINE": config("POSTGRES_ENGINE", default="django.db.backends.postgresql"),
+        "NAME": config("POSTGRES_DB", default="django_db"),
+        "USER": config("POSTGRES_USER", default="django_user"),
+        "PASSWORD": config("POSTGRES_PASSWORD", default="django_password"),
+        "HOST": config("POSTGRES_HOST", default="localhost"),
+        "PORT": config("POSTGRES_PORT", default="5432"),
     }
 }
 
