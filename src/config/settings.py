@@ -24,7 +24,7 @@ INSTALLED_APPS = [
     "rest_framework_simplejwt",
     "django_filters",
     "drf_spectacular",
-    "apps.plans"
+    "apps.plans",
     "apps.payments",
 ]
 
@@ -160,12 +160,8 @@ SIMPLE_JWT = {
     "REFRESH_TOKEN_LIFETIME": timedelta(
         days=config("JWT_REFRESH_TOKEN_LIFETIME_DAYS", default=7, cast=int)
     ),
-    "ROTATE_REFRESH_TOKENS": config(
-        "JWT_ROTATE_REFRESH_TOKENS", default=True, cast=bool
-    ),
-    "BLACKLIST_AFTER_ROTATION": config(
-        "JWT_BLACKLIST_AFTER_ROTATION", default=True, cast=bool
-    ),
+    "ROTATE_REFRESH_TOKENS": config("JWT_ROTATE_REFRESH_TOKENS", default=True, cast=bool),
+    "BLACKLIST_AFTER_ROTATION": config("JWT_BLACKLIST_AFTER_ROTATION", default=True, cast=bool),
     "UPDATE_LAST_LOGIN": True,
     "ALGORITHM": "HS256",
     "SIGNING_KEY": SECRET_KEY,
