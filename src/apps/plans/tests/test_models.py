@@ -63,3 +63,23 @@ class MembershipPlanModelTest(TestCase):
                 price=200,
                 tier=MembershipPlan.Tier.STANDARD,
             )
+
+    def test_duration_days_must_be_positive(self) -> None:
+        with self.assertRaises(IntegrityError):
+            MembershipPlan.objects.create(
+                name="Invalid Duration",
+                code="invalid-duration",
+                duration_days=0,
+                price=100,
+                tier=MembershipPlan.Tier.BASIC,
+            )
+
+    def test_price_must_be_positive(self) -> None:
+        with self.assertRaises(IntegrityError):
+            MembershipPlan.objects.create(
+                name="Invalid Price",
+                code="invalid-price",
+                duration_days=30,
+                price=0,
+                tier=MembershipPlan.Tier.BASIC,
+            )
