@@ -1,4 +1,3 @@
-import os
 from datetime import timedelta
 from pathlib import Path
 
@@ -25,6 +24,7 @@ INSTALLED_APPS = [
     "rest_framework_simplejwt",
     "django_filters",
     "drf_spectacular",
+    "apps.plans"
     "apps.payments",
 ]
 
@@ -111,11 +111,8 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 # Custom migration modules
 # Register custom migration directories for apps if needed
 MIGRATION_MODULES: dict[str, str] = {
-    # Example: "app_name": "app_name.migrations_custom",
-    # This allows you to:
-    # - Use custom migration directories
-    # - Have environment-specific migrations
-    # - Disable migrations for specific apps (set to None)
+    "plans": "migrations.plans",
+    "payments": "migrations.payments",
 }
 
 
