@@ -22,7 +22,7 @@ class Payment(models.Model):
         default=StatusChoices.PENDING,
     )
     type = models.CharField(
-        max_length=10,
+        max_length=50,
         choices=TypeChoices.choices,
     )
 
