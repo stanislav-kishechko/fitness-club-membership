@@ -32,14 +32,14 @@ repos:
     hooks:
       - id: django-check
         name: Django System Check
-        entry: python src/manage.py check
+        entry: uv run python src/manage.py check
         language: system
         pass_filenames: false
         always_run: true
 
       - id: django-check-migrations
         name: Check for missing migrations
-        entry: python src/manage.py makemigrations --check --dry-run
+        entry: uv run python src/manage.py makemigrations --check --dry-run
         language: system
         pass_filenames: false
         always_run: true

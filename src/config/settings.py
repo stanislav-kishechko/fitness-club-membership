@@ -24,6 +24,7 @@ INSTALLED_APPS = [
     "rest_framework_simplejwt",
     "django_filters",
     "drf_spectacular",
+    "apps.plans",
 ]
 
 MIDDLEWARE = [
@@ -109,13 +110,8 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 # Custom migration modules
 # Register custom migration directories for apps if needed
 MIGRATION_MODULES: dict[str, str] = {
-    # Example: "app_name": "app_name.migrations_custom",
-    # This allows you to:
-    # - Use custom migration directories
-    # - Have environment-specific migrations
-    # - Disable migrations for specific apps (set to None)
+    "plans": "migrations.plans",
 }
-
 
 # Django REST Framework
 REST_FRAMEWORK = {
