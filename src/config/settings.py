@@ -26,6 +26,7 @@ INSTALLED_APPS = [
     "drf_spectacular",
     "apps.plans",
     "apps.payments",
+    "apps.user",
 ]
 
 MIDDLEWARE = [
@@ -62,12 +63,12 @@ WSGI_APPLICATION = "config.wsgi.application"
 # Database
 DATABASES = {
     "default": {
-        "ENGINE": config("DB_ENGINE", default="django.db.backends.postgresql"),
-        "NAME": config("DB_NAME", default="django_db"),
-        "USER": config("DB_USER", default="django_user"),
-        "PASSWORD": config("DB_PASSWORD", default="django_password"),
-        "HOST": config("DB_HOST", default="localhost"),
-        "PORT": config("DB_PORT", default="5432"),
+        "ENGINE": config("POSTGRES_ENGINE", default="django.db.backends.postgresql"),
+        "NAME": config("POSTGRES_DB", default="django_db"),
+        "USER": config("POSTGRES_USER", default="django_user"),
+        "PASSWORD": config("POSTGRES_PASSWORD"),
+        "HOST": config("POSTGRES_HOST", default="localhost"),
+        "PORT": config("POSTGRES_PORT", default="5432"),
     }
 }
 
@@ -88,6 +89,7 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+AUTH_USER_MODEL = "user.User"
 
 # Internationalization
 LANGUAGE_CODE = "en-us"
@@ -113,7 +115,9 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 MIGRATION_MODULES: dict[str, str] = {
     "plans": "migrations.plans",
     "payments": "migrations.payments",
+    "user": "migrations.user",
 }
+
 
 # Django REST Framework
 REST_FRAMEWORK = {
@@ -169,7 +173,6 @@ SIMPLE_JWT = {
     "AUDIENCE": None,
     "ISSUER": None,
     "AUTH_HEADER_TYPES": ("Bearer",),
-    "AUTH_HEADER_NAME": "HTTP_AUTHORIZATION",
     "USER_ID_FIELD": "id",
     "USER_ID_CLAIM": "user_id",
     "AUTH_TOKEN_CLASSES": ("rest_framework_simplejwt.tokens.AccessToken",),
