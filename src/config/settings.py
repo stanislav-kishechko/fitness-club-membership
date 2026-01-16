@@ -24,6 +24,7 @@ INSTALLED_APPS = [
     "rest_framework_simplejwt",
     "django_filters",
     "drf_spectacular",
+    "apps.user",
 ]
 
 MIDDLEWARE = [
@@ -60,12 +61,12 @@ WSGI_APPLICATION = "config.wsgi.application"
 # Database
 DATABASES = {
     "default": {
-        "ENGINE": config("DB_ENGINE", default="django.db.backends.postgresql"),
-        "NAME": config("DB_NAME", default="django_db"),
-        "USER": config("DB_USER", default="django_user"),
-        "PASSWORD": config("DB_PASSWORD", default="django_password"),
-        "HOST": config("DB_HOST", default="localhost"),
-        "PORT": config("DB_PORT", default="5432"),
+        "ENGINE": config("POSTGRES_ENGINE", default="django.db.backends.postgresql"),
+        "NAME": config("POSTGRES_DB", default="django_db"),
+        "USER": config("POSTGRES_USER", default="django_user"),
+        "PASSWORD": config("POSTGRES_PASSWORD"),
+        "HOST": config("POSTGRES_HOST", default="localhost"),
+        "PORT": config("POSTGRES_PORT", default="5432"),
     }
 }
 
@@ -86,6 +87,7 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+AUTH_USER_MODEL = "user.User"
 
 # Internationalization
 LANGUAGE_CODE = "en-us"
@@ -108,13 +110,7 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # Custom migration modules
 # Register custom migration directories for apps if needed
-MIGRATION_MODULES: dict[str, str] = {
-    # Example: "app_name": "app_name.migrations_custom",
-    # This allows you to:
-    # - Use custom migration directories
-    # - Have environment-specific migrations
-    # - Disable migrations for specific apps (set to None)
-}
+MIGRATION_MODULES: dict[str, str] = {"user": "migrations.user"}
 
 
 # Django REST Framework
@@ -171,7 +167,7 @@ SIMPLE_JWT = {
     "AUDIENCE": None,
     "ISSUER": None,
     "AUTH_HEADER_TYPES": ("Bearer",),
-    "AUTH_HEADER_NAME": "HTTP_AUTHORIZATION",
+    #"AUTH_HEADER_NAME": "HTTP_AUTHORIZATION",
     "USER_ID_FIELD": "id",
     "USER_ID_CLAIM": "user_id",
     "AUTH_TOKEN_CLASSES": ("rest_framework_simplejwt.tokens.AccessToken",),
