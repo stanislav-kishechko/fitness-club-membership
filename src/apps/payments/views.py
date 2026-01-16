@@ -12,6 +12,7 @@ from .serializers import PaymentCreateSerializer
 from .models import Payment
 from .stripe_helper import create_checkout_session
 from apps.plans.models import MembershipPlan
+from decouple import config
 
 class StripeCheckoutView(APIView):
     permission_classes = [] #TODO: need to change to auth
@@ -58,11 +59,15 @@ def stripe_webhook(request):
 
     try:
         #тут має бути перевірка підпису від страйп
-        event = stripe.Event.construct_from(
-            json.loads(payload), stripe.api_key
+        event = stripe.Webhook.construct_event(
+            payload, sig_header, config("STRIPE_WEBHOOK_SECRET")
         )
 
-    except ValueError:
+
+    except (ValueError, stripe.error.SignatureVerificationError):
+
+        # Якщо підпис невірний або дані "биті"
+
         return HttpResponse(status=400)
 
     if event.type == "checkout.session.completed":
