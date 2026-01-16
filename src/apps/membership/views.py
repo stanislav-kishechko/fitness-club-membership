@@ -1,13 +1,19 @@
 from datetime import date, timedelta
-from django.db import transaction
 
+from django.db import transaction
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets
 from rest_framework.decorators import action
-from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
 
+from apps.membership.filters import MembershipFilter
 from apps.membership.models import Membership
-from apps.membership.serializers import MembershipReadSerializer, MembershipCreateSerializer, FreezeSerializer
+from apps.membership.serializers import (
+    FreezeSerializer,
+    MembershipCreateSerializer,
+    MembershipReadSerializer,
+)
 from apps.payments.models import Payment
 from apps.plans.models import MembershipPlan
 
@@ -15,34 +21,14 @@ from apps.plans.models import MembershipPlan
 class MembershipViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
 
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = MembershipFilter
+
     def get_queryset(self):
-        queryset = Membership.objects.all()
         user = self.request.user
-
-        if not user.is_staff:
-            queryset = queryset.filter(member=user)
-        else:
-            # Адмін може фільтрувати по member_id
-            member_id = self.request.query_params.get("member_id")
-            if member_id:
-                queryset = queryset.filter(member_id=member_id)
-
-        status_param = self.request.query_params.get("status")
-        if status_param:
-            queryset = queryset.filter(status=status_param)
-
-        auto_renew = self.request.query_params.get("auto_renew")
-        if auto_renew is not None:
-            queryset = queryset.filter(auto_renew=auto_renew.lower() == "true")
-
-        from_date = self.request.query_params.get("from")
-        to_date = self.request.query_params.get("to")
-        if from_date:
-            queryset = queryset.filter(start_date__gte=from_date)
-        if to_date:
-            queryset = queryset.filter(end_date__lte=to_date)
-
-        return queryset
+        if user.is_staff:
+            return Membership.objects.all()
+        return Membership.objects.filter(member=user)
 
     def get_serializer_class(self):
         if self.action in ["list", "retrieve"]:
@@ -60,16 +46,14 @@ class MembershipViewSet(viewsets.ModelViewSet):
                 start_date=start_date,
                 end_date=end_date,
                 price_at_purchase=plan.price,
-                status=Membership.Status.ACTIVE
+                status=Membership.Status.ACTIVE,
             )
 
-            # Створюємо платіж (Payment) через модель іншої людини
-            # Тут викликається логіка створення Stripe сесії
             Payment.objects.create(
                 membership=membership,
                 payment_type=Payment.Type.MEMBERSHIP_PURCHASE,
                 money_to_pay=plan.price,
-                status=Payment.Status.PENDING
+                status=Payment.Status.PENDING,
             )
 
     @action(detail=True, methods=["post"])
@@ -81,8 +65,8 @@ class MembershipViewSet(viewsets.ModelViewSet):
         serializer = FreezeSerializer(data=request.data)
         if serializer.is_valid():
             membership.status = Membership.Status.FROZEN
-            membership.frozen_from = serializer.validated_data['frozen_from']
-            membership.frozen_to = serializer.validated_data['frozen_to']
+            membership.frozen_from = serializer.validated_data["frozen_from"]
+            membership.frozen_to = serializer.validated_data["frozen_to"]
 
             freeze_days = (membership.frozen_to - membership.frozen_from).days
             membership.end_date += timedelta(days=freeze_days)
@@ -114,7 +98,9 @@ class MembershipViewSet(viewsets.ModelViewSet):
             return Response({"error": "Plan not found."}, status=404)
 
         if new_plan.price <= membership.price_at_purchase:
-            return Response({"error": "Upgrade is only possible to a more expensive plan."}, status=400)
+            return Response(
+                {"error": "Upgrade is only possible to a more expensive plan."}, status=400
+            )
 
         diff_price = new_plan.price - membership.price_at_purchase
 
@@ -128,7 +114,7 @@ class MembershipViewSet(viewsets.ModelViewSet):
                 membership=membership,
                 payment_type=Payment.Type.UPGRADE_FEE,
                 money_to_pay=diff_price,
-                status=Payment.Status.PENDING
+                status=Payment.Status.PENDING,
             )
 
         return Response(MembershipReadSerializer(membership).data)
