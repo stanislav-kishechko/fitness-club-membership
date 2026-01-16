@@ -3,7 +3,7 @@ from decouple import config
 from apps.bot.main import tg_bot
 
 
-def sent_pay_notification_to_bot(sender, instance, created):
+def sent_pay_notification_to_admin_chat(sender, instance, created):
     if created and instance.status == sender.StatusChoices.PAID:
         first_name = instance.user.first_name
         last_name = instance.user.last_name
