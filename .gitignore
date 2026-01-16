@@ -57,3 +57,5 @@ docs/
 # Others
 *.bak
 *.tmp
+get-pip.py
+src/celerybeat-schedule

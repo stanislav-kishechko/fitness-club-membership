@@ -24,6 +24,8 @@ INSTALLED_APPS = [
     "rest_framework_simplejwt",
     "django_filters",
     "drf_spectacular",
+    "apps.plans",
+    "apps.payments",
     "apps.user",
 ]
 
@@ -110,7 +112,11 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # Custom migration modules
 # Register custom migration directories for apps if needed
-MIGRATION_MODULES: dict[str, str] = {"user": "migrations.user"}
+MIGRATION_MODULES: dict[str, str] = {
+    "plans": "migrations.plans",
+    "payments": "migrations.payments",
+    "user": "migrations.user",
+}
 
 
 # Django REST Framework
@@ -167,7 +173,6 @@ SIMPLE_JWT = {
     "AUDIENCE": None,
     "ISSUER": None,
     "AUTH_HEADER_TYPES": ("Bearer",),
-    #"AUTH_HEADER_NAME": "HTTP_AUTHORIZATION",
     "USER_ID_FIELD": "id",
     "USER_ID_CLAIM": "user_id",
     "AUTH_TOKEN_CLASSES": ("rest_framework_simplejwt.tokens.AccessToken",),
@@ -191,3 +196,7 @@ if not DEBUG:
     SECURE_HSTS_SECONDS = 31536000
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_HSTS_PRELOAD = True
+
+# Secret keys for Stripe
+STRIPE_SECRET_KEY = config("STRIPE_SECRET_KEY", default="")
+STRIPE_PUBLIC_KEY = config("STRIPE_PUBLIC_KEY", default="")
