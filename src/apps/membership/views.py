@@ -19,6 +19,7 @@ from apps.plans.models import MembershipPlan
 
 
 class MembershipViewSet(viewsets.ModelViewSet):
+    queryset = Membership.objects.all()
     permission_classes = [IsAuthenticated]
 
     filter_backends = [DjangoFilterBackend]
@@ -51,9 +52,9 @@ class MembershipViewSet(viewsets.ModelViewSet):
 
             Payment.objects.create(
                 membership=membership,
-                payment_type=Payment.Type.MEMBERSHIP_PURCHASE,
+                payment_type=Payment.type.MEMBERSHIP_PURCHASE,
                 money_to_pay=plan.price,
-                status=Payment.Status.PENDING,
+                status=Payment.status.PENDING,
             )
 
     @action(detail=True, methods=["post"])
@@ -112,7 +113,7 @@ class MembershipViewSet(viewsets.ModelViewSet):
 
             Payment.objects.create(
                 membership=membership,
-                payment_type=Payment.Type.UPGRADE_FEE,
+                payment_type=Payment.type.UPGRADE_FEE,
                 money_to_pay=diff_price,
                 status=Payment.Status.PENDING,
             )
