@@ -6,6 +6,6 @@ from apps.user.tasks import sent_user_enroll_notification_to_admin_chat
 
 
 @receiver(post_save, sender=User)
-def post_user_handler(instance, created):
-    # todo add salary
+def post_user_handler(sender, instance, created, **kwargs):  # noqa
+    # TODO: add salary
     sent_user_enroll_notification_to_admin_chat(instance, created)
