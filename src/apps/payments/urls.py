@@ -4,6 +4,7 @@ from .views import (
     stripe_webhook,
     payment_cancel,
     payment_success,
+    PaymentHistoryView,
 )
 
 urlpatterns = [
@@ -11,6 +12,7 @@ urlpatterns = [
     path("webhook/", stripe_webhook, name="stripe-webhook"),
     path("success/", payment_success, name="success"),
     path("cancel/", payment_cancel, name="cancel"),
+    path("history/", PaymentHistoryView.as_view(), name="history"),
 ]
 
 app_name = "payments"
