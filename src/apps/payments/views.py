@@ -1,6 +1,6 @@
 import stripe
 
-from datetime import date
+from datetime import date, timedelta
 
 from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponse
@@ -18,10 +18,34 @@ from apps.plans.models import MembershipPlan
 from apps.membership.models import Membership
 from decouple import config
 
+
+def create_or_update_membership(payment):
+    """
+    Creates or updates a user membership record based on a successful payment.
+    Calculates start and end dates based on the MembershipPlan duration.
+    """
+    plan = MembershipPlan.objects.get(id=payment.membership_id)
+    today = date.today()
+    # Calculate end date based on plan duration (e.g., 30 days)
+    end_date = today + timedelta(days=plan.duration_days)
+
+    # Use update_or_create to handle both new purchases and upgrades
+    membership, created = Membership.objects.update_or_create(
+        member=payment.user,
+        defaults={
+            "plan": plan,
+            "start_date": today,
+            "end_date": end_date,
+            "status": Membership.Status.ACTIVE,
+            "price_at_purchase": payment.money_to_pay
+        }
+    )
+    return membership
+
 class StripeCheckoutView(APIView):
     """
-    View for making payment session Srtipe
-    Includes logic Upgrage payments
+    View for making payment session Stripe
+    Includes logic Upgrade payments
     """
     permission_classes = [IsAuthenticated]
 
@@ -130,6 +154,6 @@ def stripe_webhook(request):
                 payment.status = Payment.StatusChoices.PAID
                 payment.save()
                 print(f"Payment {payment_id} succeeded!")
-                #create_or_update_membership(payment)
+                create_or_update_membership(payment)
 
     return HttpResponse(status=200)
