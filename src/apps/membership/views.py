@@ -51,10 +51,11 @@ class MembershipViewSet(viewsets.ModelViewSet):
             )
 
             Payment.objects.create(
-                membership=membership,
-                payment_type=Payment.type.MEMBERSHIP_PURCHASE,
-                money_to_pay=plan.price,
-                status=Payment.status.PENDING,
+                user=self.request.user,
+                status=Payment.StatusChoices.PAID,
+                type=Payment.TypeChoices.MEMBERSHIP_PURCHASE,
+                membership_id=membership.id,
+                money_to_pay=membership.price_at_purchase
             )
 
     @action(detail=True, methods=["post"])
@@ -112,10 +113,11 @@ class MembershipViewSet(viewsets.ModelViewSet):
             membership.save()
 
             Payment.objects.create(
-                membership=membership,
-                payment_type=Payment.type.UPGRADE_FEE,
-                money_to_pay=diff_price,
-                status=Payment.Status.PENDING,
+                user=self.request.user,
+                status=Payment.StatusChoices.PAID,
+                type=Payment.TypeChoices.UPGRADE_FEE,
+                membership_id=membership.id,
+                money_to_pay=new_plan.price
             )
 
         return Response(MembershipReadSerializer(membership).data)
