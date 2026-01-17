@@ -34,7 +34,7 @@ class MembershipReadSerializer(serializers.ModelSerializer):
 class MembershipCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Membership
-        fields = ["plan", "auto_renew"]
+        fields = ["id", "plan", "auto_renew"]
 
     def validate(self, attrs):
         user = self.context["request"].user

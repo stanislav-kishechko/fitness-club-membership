@@ -117,6 +117,7 @@ MIGRATION_MODULES: dict[str, str] = {
     "plans": "migrations.plans",
     "payments": "migrations.payments",
     "user": "migrations.user",
+    "membership": "migrations.membership",
 }
 
 
