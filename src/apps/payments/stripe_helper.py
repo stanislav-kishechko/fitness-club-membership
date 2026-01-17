@@ -37,6 +37,7 @@ def create_checkout_session(
                     "currency": "USD",
                     "product_data": {
                         "name": f"Fitness Club: {payment.get_type_display()}",
+                        "description": f"Plan ID: {payment.membership_id}",
                     },
                     "unit_amount": int(payment.money_to_pay * 100),
                 },
@@ -45,7 +46,7 @@ def create_checkout_session(
             mode="payment",
             success_url=success_url,
             cancel_url=cancel_url,
-            #метадані, які допоможуть ідунтифікувати платіж при отриманні Webhook
+
             metadata={
                 "payment_id": payment.id,
                 "user_id": payment.user.id,

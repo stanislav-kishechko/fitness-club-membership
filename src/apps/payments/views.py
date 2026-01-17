@@ -7,6 +7,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponse
 from rest_framework import status, generics
 from django.urls import reverse
+from django.utils import timezone
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
@@ -62,6 +63,20 @@ class StripeCheckoutView(APIView):
         membership_id = serializer.validated_data["membership_id"]
         new_plan = MembershipPlan.objects.get(id=membership_id)
         user = request.user
+
+        #Idempotency on Django side
+        time_threshold = timezone.now() - timedelta(minutes=15)
+
+        recent_payment = Payment.objects.filter(
+            user=user,
+            membership_id=membership_id,
+            status=Payment.StatusChoices.PENDING,
+            created_at__gte=time_threshold
+        ).first()
+
+        if recent_payment and recent_payment.session_url:
+            logger.info(f"Returning existing session for payment {recent_payment.id}")
+            return Response({"checkout_url": recent_payment.session_url}, status=status.HTTP_200_OK)
 
         #Current membership for upgrade
         current_membership = Membership.objects.filter(
