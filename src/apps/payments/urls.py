@@ -7,6 +7,8 @@ from .views import (
     PaymentHistoryView,
 )
 
+
+app_name = "payments"
 urlpatterns = [
     path("create-checkout-session/", StripeCheckoutView.as_view(), name="create-checkout-session"),
     path("webhook/", stripe_webhook, name="stripe-webhook"),
