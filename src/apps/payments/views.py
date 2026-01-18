@@ -13,9 +13,9 @@ from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 
 
-from .serializers import PaymentCreateSerializer
-from .models import Payment
-from .stripe_helper import create_checkout_session
+from apps.payments.serializers import PaymentCreateSerializer, PaymentListSerializer
+from apps.payments.models import Payment
+from apps.payments.stripe_helper import create_checkout_session
 from apps.plans.models import MembershipPlan
 from apps.membership.models import Membership
 from decouple import config
@@ -44,10 +44,9 @@ def create_or_update_membership(payment):
         )
         logger.info(f"Membership for user {payment.user.id} updated successfully.")
         return membership
-    except Exception as e:
-        logger.error(f"Error activating membership for payment {payment.id}: {str(e)}")
-        raise e
-
+    except MembershipPlan.DoesNotExist:
+        logger.error(f"MembershipPlan with ID {payment.membership_id} not found.")
+        raise
 class StripeCheckoutView(APIView):
     """
     View for making payment session Stripe
@@ -90,9 +89,9 @@ class StripeCheckoutView(APIView):
         #Calculating UpgradeFee
         if current_membership:
 
-            if new_plan.tier <= current_membership.plan.tier and new_plan.price <= current_membership.plan.price:
+            if new_plan.price <= current_membership.plan.price:
                 return Response(
-                    {"error": "You can choose only higher tier plan to upgrade."},
+                    {"error": "You can choose only higher price plan to upgrade."},
                     status=status.HTTP_400_BAD_REQUEST
                 )
 
@@ -138,34 +137,16 @@ class PaymentHistoryView(generics.ListAPIView):
     Returns the payment history for the current authenticated user.
     """
     permission_classes = [IsAuthenticated]
+    serializer_class = PaymentListSerializer
 
     def get_queryset(self):
         return Payment.objects.filter(user=self.request.user).order_by('-created_at')
 
-    def list(self, request, *args, **kwargs):
-        queryset = self.get_queryset()
-        data = [{
-            "id": p.id,
-            "amount": p.money_to_pay,
-            "status": p.status,
-            "type": p.type,
-            "date": p.created_at,
-            "error": p.error_message
-        } for p in queryset]
-        return Response(data)
-
 def payment_success(request):
-    """
-        Handles successful payment redirect.
-        Retrieves session_id from URL to confirm specific transaction.
-    """
     session_id = request.GET.get('session_id')
     if session_id:
-        return HttpResponse(
-            f"Success! Your payment is processed. Session ID: {session_id}. "
-            f"Your membership is being activated."
-        )
-    return HttpResponse("Payment succeeded! Your membership is being activated.")
+        return HttpResponse(f"Success! Session ID: {session_id}")
+    return HttpResponse("Invalid URL: No session_id found", status=400)
 
 def payment_cancel(request):
     return HttpResponse("Payment canceled!")
@@ -173,9 +154,6 @@ def payment_cancel(request):
 
 @csrf_exempt
 def stripe_webhook(request):
-    """
-    Advanced Webhook handler with error tracking and idempotency.
-    """
     payload = request.body
     sig_header = request.META.get("HTTP_STRIPE_SIGNATURE")
 
@@ -187,31 +165,24 @@ def stripe_webhook(request):
         logger.warning(f"Invalid webhook signature: {str(e)}")
         return HttpResponse(status=400)
 
-    # Success payment
-    if event.type == "checkout.session.completed":
-        session = event.data.object
-        payment_id = session.get("metadata", {}).get("payment_id")
+    stripe_obj = event.data.object
+    metadata = stripe_obj.get("metadata", {})
+    payment_id = metadata.get("payment_id")
 
+    if event.type == "checkout.session.completed":
         if payment_id:
             payment = Payment.objects.filter(id=payment_id).first()
-            # 3. Захист від дублів: обробляємо тільки PENDING
             if payment and payment.status == Payment.StatusChoices.PENDING:
                 payment.status = Payment.StatusChoices.PAID
                 payment.save()
                 create_or_update_membership(payment)
-                logger.info(f"Payment {payment_id} marked as PAID via webhook.")
-            else:
-                logger.info(f"Payment {payment_id} already processed or not found.")
+                logger.info(f"Payment {payment_id} marked as PAID.")
 
-    # Failed payment
     elif event.type == "payment_intent.payment_failed":
-        intent = event.data.object
-        payment_id = intent.get("metadata", {}).get("payment_id")
-        error_msg = intent.get("last_payment_error", {}).get("message", "Unknown error")
-
         if payment_id:
             payment = Payment.objects.filter(id=payment_id).first()
             if payment:
+                error_msg = stripe_obj.get("last_payment_error", {}).get("message", "Unknown error")
                 payment.status = Payment.StatusChoices.FAILED
                 payment.error_message = error_msg
                 payment.save()

@@ -1,8 +1,9 @@
 import stripe
 from django.conf import  settings
-from .models import StripeCustomer, Payment
+from decouple import config
+from apps.payments.models import StripeCustomer, Payment
 
-stripe.api_key = settings.STRIPE_SECRET_KEY
+stripe.api_key = config("STRIPE_SECRET_KEY")
 
 def get_or_create_stripe_customer(user):
     customer_mapping = StripeCustomer.objects.filter(user=user).first()
@@ -49,7 +50,6 @@ def create_checkout_session(
 
             metadata={
                 "payment_id": payment.id,
-                "user_id": payment.user.id,
             }
         )
         payment.session_id = session.id
