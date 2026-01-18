@@ -14,6 +14,7 @@ venv/
 env/
 ENV/
 .venv
+.venv_linux
 
 # Django
 *.log
@@ -59,3 +60,4 @@ docs/
 *.tmp
 get-pip.py
 src/celerybeat-schedule
+.venv_linux/

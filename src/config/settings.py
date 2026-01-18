@@ -10,7 +10,7 @@ SECRET_KEY = config("SECRET_KEY", default="django-insecure-change-me-in-producti
 
 DEBUG = config("DEBUG", default=True, cast=bool)
 
-ALLOWED_HOSTS = config("ALLOWED_HOSTS", default="localhost,127.0.0.1", cast=Csv())
+ALLOWED_HOSTS = config("ALLOWED_HOSTS", default="localhost,127.0.0.1", cast=Csv(),)
 
 # Application definition
 INSTALLED_APPS = [
@@ -67,7 +67,7 @@ DATABASES = {
         "ENGINE": config("POSTGRES_ENGINE", default="django.db.backends.postgresql"),
         "NAME": config("POSTGRES_DB", default="django_db"),
         "USER": config("POSTGRES_USER", default="django_user"),
-        "PASSWORD": config("POSTGRES_PASSWORD"),
+        "PASSWORD": config("POSTGRES_PASSWORD", default="django_password"),
         "HOST": config("POSTGRES_HOST", default="localhost"),
         "PORT": config("POSTGRES_PORT", default="5432"),
     }
@@ -202,3 +202,4 @@ if not DEBUG:
 # Secret keys for Stripe
 STRIPE_SECRET_KEY = config("STRIPE_SECRET_KEY", default="")
 STRIPE_PUBLIC_KEY = config("STRIPE_PUBLIC_KEY", default="")
+STRIPE_WEBHOOK_SECRET = config("STRIPE_WEBHOOK_SECRET", default="")

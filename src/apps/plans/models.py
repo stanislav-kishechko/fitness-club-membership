@@ -17,11 +17,11 @@ class MembershipPlan(models.Model):
         ordering = ["price"]
         constraints = [
             models.CheckConstraint(
-                check=models.Q(duration_days__gt=0),
+                condition=models.Q(duration_days__gt=0), #TODO was check=models
                 name="duration_days_positive",
             ),
             models.CheckConstraint(
-                check=models.Q(price__gt=0),
+                condition=models.Q(price__gt=0),  #TODO was check=models
                 name="price_positive",
             ),
         ]

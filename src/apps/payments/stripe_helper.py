@@ -1,8 +1,9 @@
 import stripe
 from django.conf import  settings
-from .models import StripeCustomer, Payment
+from decouple import config
+from apps.payments.models import StripeCustomer, Payment
 
-stripe.api_key = settings.STRIPE_SECRET_KEY
+stripe.api_key = config("STRIPE_SECRET_KEY")
 
 def get_or_create_stripe_customer(user):
     customer_mapping = StripeCustomer.objects.filter(user=user).first()
@@ -37,6 +38,7 @@ def create_checkout_session(
                     "currency": "USD",
                     "product_data": {
                         "name": f"Fitness Club: {payment.get_type_display()}",
+                        "description": f"Plan ID: {payment.membership_id}",
                     },
                     "unit_amount": int(payment.money_to_pay * 100),
                 },
@@ -45,10 +47,9 @@ def create_checkout_session(
             mode="payment",
             success_url=success_url,
             cancel_url=cancel_url,
-            #метадані, які допоможуть ідунтифікувати платіж при отриманні Webhook
+
             metadata={
                 "payment_id": payment.id,
-                "user_id": payment.user.id,
             }
         )
         payment.session_id = session.id
