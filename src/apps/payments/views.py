@@ -23,30 +23,33 @@ from decouple import config
 logger = logging.getLogger(__name__)
 
 def create_or_update_membership(payment):
-    """
-    Creates or updates a user membership record based on a successful payment.
-    Calculates start and end dates based on the MembershipPlan duration.
-    """
     try:
         plan = MembershipPlan.objects.get(id=payment.membership_id)
+        membership = Membership.objects.filter(member=payment.user).first()
         today = date.today()
-        end_date = today + timedelta(days=plan.duration_days)
 
-        membership, created = Membership.objects.update_or_create(
+        if membership and membership.end_date > today:
+            start_date = membership.end_date
+        else:
+            start_date = today
+
+        end_date = start_date + timedelta(days=plan.duration_days)
+
+        Membership.objects.update_or_create(
             member=payment.user,
             defaults={
                 'plan': plan,
-                'start_date': today,
+                'start_date': start_date,
                 'end_date': end_date,
                 'status': Membership.Status.ACTIVE,
-                'price_at_purchase': payment.money_to_pay
+                'price_at_purchase': plan.price
             }
         )
-        logger.info(f"Membership for user {payment.user.id} updated successfully.")
-        return membership
+        logger.info(f"Membership updated for {payment.user.email}. Ends: {end_date}")
+
     except MembershipPlan.DoesNotExist:
-        logger.error(f"MembershipPlan with ID {payment.membership_id} not found.")
-        raise
+        logger.error(f"Plan {payment.membership_id} not found.")
+
 class StripeCheckoutView(APIView):
     """
     View for making payment session Stripe
