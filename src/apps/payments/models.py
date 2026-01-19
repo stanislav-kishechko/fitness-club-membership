@@ -40,7 +40,6 @@ class Payment(models.Model):
         help_text="Money from membership to payment",
     )
 
-    #Field for tracking errors
     error_message = models.TextField(
         blank=True,
         null=True,
@@ -81,4 +80,3 @@ class StripeCustomer(models.Model):
 
     def __str__(self):
         return f"Stripe Customer ID: {self.stripe_customer_id}"
-

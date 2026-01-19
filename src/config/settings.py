@@ -10,7 +10,7 @@ SECRET_KEY = config("SECRET_KEY", default="django-insecure-change-me-in-producti
 
 DEBUG = config("DEBUG", default=True, cast=bool)
 
-ALLOWED_HOSTS = config("ALLOWED_HOSTS", default="localhost,127.0.0.1", cast=Csv(),)
+ALLOWED_HOSTS = config("ALLOWED_HOSTS", default="localhost,127.0.0.1", cast=Csv())
 
 # Application definition
 INSTALLED_APPS = [
@@ -110,7 +110,6 @@ MEDIA_ROOT = ROOT_DIR / "media"
 # Default primary key field type
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-
 # Custom migration modules
 # Register custom migration directories for apps if needed
 MIGRATION_MODULES: dict[str, str] = {
@@ -119,7 +118,6 @@ MIGRATION_MODULES: dict[str, str] = {
     "user": "migrations.user",
     "membership": "migrations.membership",
 }
-
 
 # Django REST Framework
 REST_FRAMEWORK = {
