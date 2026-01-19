@@ -1,11 +1,11 @@
-from django.db.models.signals import post_save
-from django.dispatch import receiver
+from django.dispatch import Signal, receiver
 
-from apps.payments.models import Payment
 from apps.payments.tasks import sent_pay_notification_to_admin_chat
 
+payment_successful_signal = Signal()
 
-@receiver(post_save, sender=Payment)
-def post_payment_handler(sender, instance, created):
-    #todo add salary
-    sent_pay_notification_to_admin_chat(sender, instance, created)
+
+@receiver(payment_successful_signal)
+def post_payment_handler(sender, instance, **kwargs):  # noqa
+    # TODO: add salary
+    sent_pay_notification_to_admin_chat(sender, instance)
