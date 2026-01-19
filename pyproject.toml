@@ -9,7 +9,7 @@ dependencies = [
     "djangorestframework-simplejwt",
     "drf-spectacular",
     "whitenoise>=6.11.0",
-    "psycopg2-binary>=2.9.11",
+    "psycopg2-binary", #TODO: додати "-binary"
     "python-decouple>=3.8",
     "celery>=5.3",
     "redis>=5.0",
@@ -17,6 +17,7 @@ dependencies = [
     "flower>=2.0",
     "gunicorn>=23.0.0",
     "pillow>=12.0.0",
+    "stripe",
 ]
 
 [project.optional-dependencies]

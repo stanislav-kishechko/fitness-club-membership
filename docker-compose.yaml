@@ -6,7 +6,7 @@ services:
     env_file:
       - .env
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
+      test: ["CMD-SHELL", "pg_isready"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -27,69 +27,69 @@ services:
     depends_on:
       db:
         condition: service_healthy
-      redis:
-        condition: service_started
-
-  redis:
-    image: redis:7-alpine
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
-  celery:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    command: celery -A config worker -l info
-    volumes:
-      - ./src:/app/src
-    depends_on:
-      web:
-        condition: service_started
-      redis:
-        condition: service_healthy
-      db:
-        condition: service_healthy
-    restart: on-failure
-    env_file:
-      - .env
-
-  celery-beat:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    command: >
-      sh -c "celery -A config beat -l INFO
-             --scheduler django_celery_beat.schedulers:DatabaseScheduler"
-    volumes:
-      - ./src:/app/src
-    depends_on:
-      web:
-        condition: service_started
-      redis:
-        condition: service_healthy
-      db:
-        condition: service_healthy
-    restart: on-failure
-    env_file:
-      - .env
-
-  flower:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    ports:
-      - "5555:5555"
-    command: celery -A config flower --address=0.0.0.0
-    volumes:
-      - ./src:/app/src
-    depends_on:
-      celery:
-        condition: service_started
-    env_file:
-      - .env
+#      redis:
+#        condition: service_started
+#
+#  redis:
+#    image: redis:7-alpine
+#    healthcheck:
+#      test: ["CMD", "redis-cli", "ping"]
+#      interval: 10s
+#      timeout: 5s
+#      retries: 5
+#
+#  celery:
+#    build:
+#      context: .
+#      dockerfile: Dockerfile
+#    command: celery -A config worker -l info
+#    volumes:
+#      - ./src:/app/src
+#    depends_on:
+#      web:
+#        condition: service_started
+#      redis:
+#        condition: service_healthy
+#      db:
+#        condition: service_healthy
+#    restart: on-failure
+#    env_file:
+#      - .env
+#
+#  celery-beat:
+#    build:
+#      context: .
+#      dockerfile: Dockerfile
+#    command: >
+#      sh -c "celery -A config beat -l INFO
+#             --scheduler django_celery_beat.schedulers:DatabaseScheduler"
+#    volumes:
+#      - ./src:/app/src
+#    depends_on:
+#      web:
+#        condition: service_started
+#      redis:
+#        condition: service_healthy
+#      db:
+#        condition: service_healthy
+#    restart: on-failure
+#    env_file:
+#      - .env
+#
+#  flower:
+#    build:
+#      context: .
+#      dockerfile: Dockerfile
+#    ports:
+#      - "5555:5555"
+#    command: celery -A config flower --address=0.0.0.0
+#    volumes:
+#      - ./src:/app/src
+#    depends_on:
+#      celery:
+#        condition: service_started
+#    env_file:
+#      - .env
 
 volumes:
   postgres_data:

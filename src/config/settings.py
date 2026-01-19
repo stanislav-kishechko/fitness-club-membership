@@ -10,7 +10,7 @@ SECRET_KEY = config("SECRET_KEY", default="django-insecure-change-me-in-producti
 
 DEBUG = config("DEBUG", default=True, cast=bool)
 
-ALLOWED_HOSTS = config("ALLOWED_HOSTS", default="localhost,127.0.0.1", cast=Csv())
+ALLOWED_HOSTS = config("ALLOWED_HOSTS", default="localhost,127.0.0.1", cast=Csv(),)
 
 # Application definition
 INSTALLED_APPS = [
@@ -24,6 +24,10 @@ INSTALLED_APPS = [
     "rest_framework_simplejwt",
     "django_filters",
     "drf_spectacular",
+    "apps.plans",
+    "apps.payments",
+    "apps.user",
+    "apps.membership",
 ]
 
 MIDDLEWARE = [
@@ -60,12 +64,12 @@ WSGI_APPLICATION = "config.wsgi.application"
 # Database
 DATABASES = {
     "default": {
-        "ENGINE": config("DB_ENGINE", default="django.db.backends.postgresql"),
-        "NAME": config("DB_NAME", default="django_db"),
-        "USER": config("DB_USER", default="django_user"),
-        "PASSWORD": config("DB_PASSWORD", default="django_password"),
-        "HOST": config("DB_HOST", default="localhost"),
-        "PORT": config("DB_PORT", default="5432"),
+        "ENGINE": config("POSTGRES_ENGINE", default="django.db.backends.postgresql"),
+        "NAME": config("POSTGRES_DB", default="django_db"),
+        "USER": config("POSTGRES_USER", default="django_user"),
+        "PASSWORD": config("POSTGRES_PASSWORD", default="django_password"),
+        "HOST": config("POSTGRES_HOST", default="localhost"),
+        "PORT": config("POSTGRES_PORT", default="5432"),
     }
 }
 
@@ -86,6 +90,7 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+AUTH_USER_MODEL = "user.User"
 
 # Internationalization
 LANGUAGE_CODE = "en-us"
@@ -109,11 +114,9 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 # Custom migration modules
 # Register custom migration directories for apps if needed
 MIGRATION_MODULES: dict[str, str] = {
-    # Example: "app_name": "app_name.migrations_custom",
-    # This allows you to:
-    # - Use custom migration directories
-    # - Have environment-specific migrations
-    # - Disable migrations for specific apps (set to None)
+    "plans": "migrations.plans",
+    "payments": "migrations.payments",
+    "user": "migrations.user",
 }
 
 
@@ -171,7 +174,6 @@ SIMPLE_JWT = {
     "AUDIENCE": None,
     "ISSUER": None,
     "AUTH_HEADER_TYPES": ("Bearer",),
-    "AUTH_HEADER_NAME": "HTTP_AUTHORIZATION",
     "USER_ID_FIELD": "id",
     "USER_ID_CLAIM": "user_id",
     "AUTH_TOKEN_CLASSES": ("rest_framework_simplejwt.tokens.AccessToken",),
@@ -195,3 +197,8 @@ if not DEBUG:
     SECURE_HSTS_SECONDS = 31536000
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_HSTS_PRELOAD = True
+
+# Secret keys for Stripe
+STRIPE_SECRET_KEY = config("STRIPE_SECRET_KEY", default="")
+STRIPE_PUBLIC_KEY = config("STRIPE_PUBLIC_KEY", default="")
+STRIPE_WEBHOOK_SECRET = config("STRIPE_WEBHOOK_SECRET", default="")
