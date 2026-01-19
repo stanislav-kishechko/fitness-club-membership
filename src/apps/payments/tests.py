@@ -42,7 +42,7 @@ class TestPaymentFullCoverage:
             user=user, membership_id=999, money_to_pay=100, status=Payment.StatusChoices.PAID
         )
         create_or_update_membership(payment)
-        assert "Plan 999 not found" in caplog.text
+        assert f"Plan {payment.membership_id} not found" in caplog.text
 
     @patch("stripe.Webhook.construct_event")
     def test_webhook_success(self, mock_webhook, client, setup_data):
@@ -54,7 +54,6 @@ class TestPaymentFullCoverage:
         mock_event.type = "checkout.session.completed"
         mock_event.data.object = {"metadata": {"payment_id": str(payment.id)}}
         mock_webhook.return_value = mock_event
-
         url = reverse("payments:stripe-webhook")
         response = client.post(url, data={}, content_type="application/json")
         payment.refresh_from_db()
@@ -74,10 +73,10 @@ class TestPaymentFullCoverage:
             "last_payment_error": {"message": "Insufficient funds"}
         }
         mock_webhook.return_value = mock_event
-
         url = reverse("payments:stripe-webhook")
         response = client.post(url, data={}, content_type="application/json")
         payment.refresh_from_db()
+        assert response.status_code == 200
         assert payment.status == Payment.StatusChoices.FAILED
         assert payment.error_message == "Insufficient funds"
 
