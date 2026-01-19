@@ -1,29 +1,30 @@
-import stripe
 import logging
-
 from datetime import date, timedelta
 
-from django.views.decorators.csrf import csrf_exempt
+import stripe
+from decouple import config
 from django.http import HttpResponse
-from rest_framework import status, generics
 from django.urls import reverse
 from django.utils import timezone
+from django.views.decorators.csrf import csrf_exempt
+from rest_framework import generics, status
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.permissions import IsAuthenticated
 
-from .serializers import PaymentCreateSerializer
-from .models import Payment
-from .stripe_helper import create_checkout_session
-
-from apps.payments.serializers import PaymentCreateSerializer, PaymentListSerializer
+from apps.membership.models import Membership
 from apps.payments.models import Payment
+from apps.payments.serializers import PaymentCreateSerializer, PaymentListSerializer
+from apps.payments.signals import payment_successful_signal
 from apps.payments.stripe_helper import create_checkout_session
 from apps.plans.models import MembershipPlan
-from apps.membership.models import Membership
-from decouple import config
+
+from .models import Payment
+from .serializers import PaymentCreateSerializer
+from .stripe_helper import create_checkout_session
 
 logger = logging.getLogger(__name__)
+
 
 def create_or_update_membership(payment):
     """
@@ -50,6 +51,8 @@ def create_or_update_membership(payment):
     except MembershipPlan.DoesNotExist:
         logger.error(f"MembershipPlan with ID {payment.membership_id} not found.")
         raise
+
+
 class StripeCheckoutView(APIView):
     """
     View for making payment session Stripe
@@ -66,7 +69,7 @@ class StripeCheckoutView(APIView):
         new_plan = MembershipPlan.objects.get(id=membership_id)
         user = request.user
 
-        #Idempotency on Django side
+        # Idempotency on Django side
         time_threshold = timezone.now() - timedelta(minutes=15)
 
         recent_payment = Payment.objects.filter(
@@ -80,7 +83,7 @@ class StripeCheckoutView(APIView):
             logger.info(f"Returning existing session for payment {recent_payment.id}")
             return Response({"checkout_url": recent_payment.session_url}, status=status.HTTP_200_OK)
 
-        #Current membership for upgrade
+        # Current membership for upgrade
         current_membership = Membership.objects.filter(
             member=user,
             status=Membership.Status.ACTIVE,
@@ -89,7 +92,7 @@ class StripeCheckoutView(APIView):
         money_to_pay = new_plan.price
         payment_type = Payment.TypeChoices.MEMBERSHIP_PURCHASE
 
-        #Calculating UpgradeFee
+        # Calculating UpgradeFee
         if current_membership:
 
             if new_plan.price <= current_membership.plan.price:
@@ -100,7 +103,6 @@ class StripeCheckoutView(APIView):
 
             today = date.today()
             if current_membership.end_date > today:
-
                 remaining_days = (current_membership.end_date - today).days
 
                 price_per_day_old = current_membership.plan.price / current_membership.plan.duration_days
@@ -145,11 +147,13 @@ class PaymentHistoryView(generics.ListAPIView):
     def get_queryset(self):
         return Payment.objects.filter(user=self.request.user).order_by('-created_at')
 
+
 def payment_success(request):
     session_id = request.GET.get('session_id')
     if session_id:
         return HttpResponse(f"Success! Session ID: {session_id}")
     return HttpResponse("Invalid URL: No session_id found", status=400)
+
 
 def payment_cancel(request):
     return HttpResponse("Payment canceled!")
@@ -180,6 +184,10 @@ def stripe_webhook(request):
                 payment.save()
                 create_or_update_membership(payment)
                 logger.info(f"Payment {payment_id} marked as PAID.")
+                payment_successful_signal.send(
+                    sender=Payment,
+                    instance=payment
+                )
 
     elif event.type == "payment_intent.payment_failed":
         if payment_id:
