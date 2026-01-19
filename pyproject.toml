@@ -17,8 +17,10 @@ dependencies = [
     "flower>=2.0",
     "gunicorn>=23.0.0",
     "pillow>=12.0.0",
-    "telebot",
-    "stripe",
+    "pytelegrambotapi>=4.29.1",
+    "djangorestframework-stubs>=3.16.7",
+    "stripe>=14.2.0",
+    "telebot>=0.0.5"
 ]
 
 [project.optional-dependencies]

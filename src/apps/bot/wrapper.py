@@ -22,7 +22,7 @@ class BaseBotWrapper:
         self.bot.infinity_polling()
 
     def send_message(self, cid: int | str, text: str, **kwargs):
-        self.bot.send_message(cid, text, **kwargs)
+        return self.bot.send_message(cid, text, **kwargs)
 
 
 class SubscrUnsubscrBotWrapper(SubscriptionMixin, UnsubscriptionMixin, BaseBotWrapper):
