@@ -2,7 +2,7 @@ from datetime import date, timedelta
 
 from django.db import transaction
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import viewsets
+from rest_framework import viewsets, status, serializers
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -37,22 +37,34 @@ class MembershipViewSet(viewsets.ModelViewSet):
         return MembershipCreateSerializer
 
     def perform_create(self, serializer):
+        user = self.request.user
         plan = serializer.validated_data["plan"]
+
+        existing_membership = Membership.objects.filter(
+            member=user,
+            status__in=[Membership.Status.ACTIVE, Membership.Status.FROZEN]
+        ).exists()
+
+        if existing_membership:
+            raise serializers.ValidationError(
+                "You already have an active or frozen membership."
+            )
+
         start_date = date.today()
         end_date = start_date + timedelta(days=plan.duration_days)
 
         with transaction.atomic():
             membership = serializer.save(
-                member=self.request.user,
+                member=user,
                 start_date=start_date,
                 end_date=end_date,
                 price_at_purchase=plan.price,
-                status=Membership.Status.ACTIVE,
+                status="PENDING",
             )
 
             Payment.objects.create(
-                user=self.request.user,
-                status=Payment.StatusChoices.PAID,
+                user=user,
+                status=Payment.StatusChoices.PENDING,
                 type=Payment.TypeChoices.MEMBERSHIP_PURCHASE,
                 membership_id=membership.id,
                 money_to_pay=membership.price_at_purchase
@@ -61,19 +73,34 @@ class MembershipViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=["post"])
     def freeze(self, request, pk=None):
         membership = self.get_object()
+
         if membership.status != Membership.Status.ACTIVE:
             return Response({"error": "Only an active subscription can be frozen."}, status=400)
 
+        expected_end_date = membership.start_date + timedelta(
+            days=membership.plan.duration_days
+        )
+
+        if membership.end_date > expected_end_date:
+            return Response({"error": "This subscription has already been frozen."}, status=400)
+
         serializer = FreezeSerializer(data=request.data)
         if serializer.is_valid():
+            frozen_from = serializer.validated_data["frozen_from"]
+            frozen_to = serializer.validated_data["frozen_to"]
+
+            freeze_days = (frozen_to - frozen_from).days
+
+            if freeze_days > 30 or freeze_days <= 0:
+                return Response({"error": "Freeze period must be between 1 and 30 days."}, status=400)
+
             membership.status = Membership.Status.FROZEN
-            membership.frozen_from = serializer.validated_data["frozen_from"]
-            membership.frozen_to = serializer.validated_data["frozen_to"]
+            membership.frozen_from = frozen_from
+            membership.frozen_to = frozen_to
 
-            freeze_days = (membership.frozen_to - membership.frozen_from).days
             membership.end_date += timedelta(days=freeze_days)
-
             membership.save()
+
             return Response(MembershipReadSerializer(membership).data)
         return Response(serializer.errors, status=400)
 
@@ -104,20 +131,28 @@ class MembershipViewSet(viewsets.ModelViewSet):
                 {"error": "Upgrade is only possible to a more expensive plan."}, status=400
             )
 
-        diff_price = new_plan.price - membership.price_at_purchase
+        total_days = (membership.end_date - membership.start_date).days
+        remaining_days = (membership.end_date - date.today()).days
+
+        if total_days > 0:
+            remaining_value = (membership.price_at_purchase / total_days) * remaining_days
+        else:
+            remaining_value = 0
+
+        diff_price = round(new_plan.price - remaining_value, 2)
 
         with transaction.atomic():
-            membership.plan = new_plan
-            membership.price_at_purchase = new_plan.price
-            membership.end_date = membership.start_date + timedelta(days=new_plan.duration_days)
-            membership.save()
-
-            Payment.objects.create(
-                user=self.request.user,
-                status=Payment.StatusChoices.PAID,
+            payment = Payment.objects.create(
+                user=request.user,
+                status=Payment.StatusChoices.PENDING,
                 type=Payment.TypeChoices.UPGRADE_FEE,
                 membership_id=membership.id,
-                money_to_pay=new_plan.price
+                money_to_pay=max(diff_price, 0)
             )
 
-        return Response(MembershipReadSerializer(membership).data)
+            return Response({
+                "message": "Upgrade payment created. Once paid, your plan will be updated.",
+                "payment_id": payment.id,
+                "amount_to_pay": payment.money_to_pay,
+                "new_plan_name": new_plan.name
+            }, status=status.HTTP_201_CREATED)
