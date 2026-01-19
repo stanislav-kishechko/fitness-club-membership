@@ -1,8 +1,10 @@
+from celery import shared_task
 from decouple import config
 
 from apps.bot.main import tg_bot
 
 
+@shared_task()
 def sent_pay_notification_to_admin_chat(sender, instance):
     if instance.status == sender.StatusChoices.PAID:
         first_name = instance.user.first_name

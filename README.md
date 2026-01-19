@@ -1,1005 +1,298 @@
 # Fitness Club Membership Service
 
-## 📋 Table of Contents
+## About This Project
 
-- [Features](#features)
-- [Requirements](#requirements)
-- [Installation](#installation)
-- [Project Structure](#project-structure)
-- [Usage](#usage)
-- [Testing](#testing)
-- [Development Tools](#development-tools)
-- [Docker](#docker)
+### What is it?
 
-## ✨ Features
+The Fitness Club Membership Service is an online membership management system designed to modernize and automate how fitness clubs handle their memberships. It replaces manual, spreadsheet-based tracking with a comprehensive digital solution.
 
-- 🚀 **uv** - Fast Python package manager
-- 🎨 **ruff** - Ultra-fast linter and code formatter
-- 🔍 **pre-commit** - Automatic code checks before commits
-- 🧪 **pytest** - Modern testing framework
-- 📚 **DRF Spectacular** - Automatic OpenAPI documentation generation
-- 🔒 **Django REST Framework** - Powerful API toolkit
-- 🔐 **JWT Authentication** - Secure token-based authentication
-- 🐳 **Docker Compose** - Containerized PostgreSQL and Redis
+### Why do we need it?
 
-## 📦 Requirements
+Traditional fitness clubs face several challenges:
+- **Manual tracking:** Staff manage memberships using spreadsheets and cash, which is time-consuming and error-prone
+- **Missed renewals:** Members forget to renew, leading to lost revenue
+- **Confused status tracking:** Hard to know who's active, frozen, or expired
+- **Payment delays:** Members must visit the front desk to pay, creating bottlenecks
+- **Limited visibility:** Administrators lack real-time insights into membership status
 
-- Python 3.11+
-- PostgreSQL 14+ (or Docker)
-- uv (package manager)
+### What does it solve?
 
-### Installing uv
+This system provides:
+- **Online self-service:** Members can purchase, renew, freeze, and cancel memberships from anywhere
+- **Automated payments:** Secure online payments through Stripe
+- **Real-time notifications:** Staff receive instant Telegram alerts about purchases, expirations, and payments
+- **Automatic tracking:** The system monitors membership status and sends expiration reminders
+- **Auto-renewal:** Optional automatic membership renewal to prevent lapses
+- **Upgrade flexibility:** Members can upgrade their plans mid-term with prorated pricing
 
-```bash
-# macOS/Linux
-curl -LsSf https://astral.sh/uv/install.sh | sh
+## Key Features
 
-# Windows
-powershell -c "irm https://astral.sh/uv/install.ps1 | iex"
+- **Membership Management:** Purchase, renew, freeze, resume, cancel, and upgrade memberships
+- **Multiple Plan Tiers:** Basic, Standard, and Premium membership options
+- **Secure Payments:** Integrated Stripe payment processing
+- **Smart Notifications:** Telegram alerts for staff about important events
+- **Automated Reminders:** System sends notifications 7, 3, and 1 day before expiration
+- **Flexible Freezing:** Members can pause memberships for up to 30 days
+- **API-First Design:** Fully functional through browsable API interface
 
-# Or via pip
-pip install uv
-```
+---
 
-## 🚀 Installation
+## Getting Started Guide (For Non-Technical Users)
 
-### 1. Clone Repository
+This guide will help you run the Fitness Club Membership Service on your computer, even if you don't have technical experience.
 
-```bash
-git clone <repository-url>
-cd django-project
-```
+## Prerequisites
 
-### 2. Create Virtual Environment with uv
+Before running the project, you need to install two programs:
 
-```bash
-# Create venv
-uv venv
+### 1. Docker Desktop
 
-# Activate (Linux/macOS)
-source .venv/bin/activate
+**What is it?** Docker is a program that allows you to run applications in special containers without worrying about setting up the environment.
 
-# Activate (Windows)
-.venv\Scripts\activate
-```
+**Where to download:**
+- For Windows & Mac: [https://www.docker.com/products/docker-desktop](https://www.docker.com/products/docker-desktop)
+- For Linux: Follow instructions on the official Docker website
 
-### 3. Install Dependencies
+**How to install:**
+1. Download the installation file from the website
+2. Run the downloaded file
+3. Follow the on-screen instructions
+4. Restart your computer after installation
 
-```bash
-# Install all dependencies including dev
-uv pip install -e ".[dev]"
+### 2. Git
 
-# Or use Makefile
-make dev-install
-```
+**What is it?** Git is a program for working with project code.
 
-### 4. Database Setup
+**Where to download:**
+- For all operating systems: [https://git-scm.com/downloads](https://git-scm.com/downloads)
 
-#### Option A: Using Docker
+**How to install:**
+1. Download the installation file
+2. Run it
+3. During installation, you can simply click "Next" (all default settings will work)
 
-```bash
-# Start PostgreSQL and Redis
-docker-compose up -d
+## Downloading the Project
 
-# Check status
-docker-compose ps
-```
+1. **Open Terminal (Command Prompt):**
+   - **Windows:** Press `Win + R`, type `cmd`, and press Enter
+   - **Mac:** Press `Cmd + Space`, type `Terminal`, and press Enter
+   - **Linux:** Press `Ctrl + Alt + T`
 
-#### Option B: Local PostgreSQL
-
-Install PostgreSQL and create database:
-
-```sql
-CREATE DATABASE django_db;
-CREATE USER django_user WITH PASSWORD 'django_password';
-ALTER ROLE django_user SET client_encoding TO 'utf8';
-ALTER ROLE django_user SET default_transaction_isolation TO 'read committed';
-ALTER ROLE django_user SET timezone TO 'UTC';
-GRANT ALL PRIVILEGES ON DATABASE django_db TO django_user;
-```
-
-### 5. Environment Variables Setup
-
-```bash
-# Copy .env.sample
-cp .env.sample .env
-
-# Edit .env (add your values)
-nano .env
-```
-
-Example `.env`:
-
-```env
-SECRET_KEY=your-super-secret-key-change-me
-DEBUG=True
-ALLOWED_HOSTS=localhost,127.0.0.1
-
-DB_ENGINE=django.db.backends.postgresql
-DB_NAME=django_db
-DB_USER=django_user
-DB_PASSWORD=django_password
-DB_HOST=localhost
-DB_PORT=5432
-```
-
-### 6. Database Migrations
-
-```bash
-cd src
-python manage.py makemigrations
-python manage.py migrate
-
-# Or via Makefile
-make migrate
-```
-
-### 7. Create Superuser
-
-```bash
-cd src
-python manage.py createsuperuser
-```
-
-### 8. Install pre-commit hooks
-
-```bash
-pre-commit install
-```
-
-## 📁 Project Structure
-
-```
-django-project/
-├── src/
-│   ├── apps/                    # Django apps
-│   │   ├── __init__.py
-│   │   └── example_app/         # Example app
-│   ├── config/                  # Project configuration
-│   │   ├── __init__.py
-│   │   ├── asgi.py
-│   │   ├── settings.py
-│   │   ├── urls.py
-│   │   └── wsgi.py
-│   ├── migrations/              # Database migrations
-│   └── manage.py
-├── tests/                       # Tests
-│   ├── conftest.py             # pytest configuration
-│   ├── unit/                   # Unit tests
-│   │   └── test_example.py
-│   └── integration/            # Integration tests
-│       └── test_api.py
-├── .env.sample                 # Environment variables example
-├── .gitignore
-├── .pre-commit-config.yaml     # pre-commit configuration
-├── docker-compose.yml          # Docker Compose configuration
-├── Makefile                    # Command automation
-├── pyproject.toml              # Project and tools configuration
-├── README.md
-└── uv.lock                     # Dependencies lock file
-```
-
-## 🎯 Usage
-
-### Run Development Server
-
-```bash
-# Via manage.py
-cd src
-python manage.py runserver
-
-# Or via Makefile
-make run
-```
-
-Server will be available at: http://localhost:8000
-
-### Admin Panel
-
-```
-URL: http://localhost:8000/admin/
-Login: your superuser
-Password: your password
-```
-
-### API Documentation
-
-After starting the server, documentation is available:
-
-- **Swagger UI**: http://localhost:8000/api/docs/
-- **ReDoc**: http://localhost:8000/api/redoc/
-- **OpenAPI Schema**: http://localhost:8000/api/schema/
-
-### JWT Authentication
-
-The project uses JWT (JSON Web Tokens) for authentication. See [JWT_AUTHENTICATION.md](JWT_AUTHENTICATION.md) for detailed documentation.
-
-#### Quick Start
-
-1. **Obtain Token:**
-```bash
-curl -X POST http://localhost:8000/api/token/ \
-  -H "Content-Type: application/json" \
-  -d '{"username": "your_username", "password": "your_password"}'
-```
-
-Response:
-```json
-{
-  "access": "eyJ0eXAiOiJKV1QiLCJhbGc...",
-  "refresh": "eyJ0eXAiOiJKV1QiLCJhbGc..."
-}
-```
-
-2. **Use Token in Requests:**
-```bash
-curl http://localhost:8000/api/v1/books/ \
-  -H "Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGc..."
-```
-
-3. **Refresh Token:**
-```bash
-curl -X POST http://localhost:8000/api/token/refresh/ \
-  -H "Content-Type: application/json" \
-  -d '{"refresh": "eyJ0eXAiOiJKV1QiLCJhbGc..."}'
-```
-
-**JWT Endpoints:**
-- `POST /api/token/` - Obtain access and refresh tokens
-- `POST /api/token/refresh/` - Refresh access token
-- `POST /api/token/verify/` - Verify token validity
-
-**Configuration** (`.env`):
-```env
-JWT_ACCESS_TOKEN_LIFETIME_MINUTES=60
-JWT_REFRESH_TOKEN_LIFETIME_DAYS=7
-JWT_ROTATE_REFRESH_TOKENS=True
-JWT_BLACKLIST_AFTER_ROTATION=True
-```
-
-
-### Django Shell
-
-```bash
-cd src
-python manage.py shell
-
-# Or with extended shell (if shell_plus is installed)
-make shell
-```
-
-## 🧪 Testing
-
-### Run All Tests
-
-```bash
-pytest
-
-# Or via Makefile
-make test
-```
-
-### Run Specific Tests
-
-```bash
-# Unit tests
-pytest tests/unit/
-
-# Integration tests
-pytest tests/integration/
-
-# Specific file
-pytest tests/unit/test_example.py
-
-# Specific test
-pytest tests/unit/test_example.py::TestExample::test_example
-```
-
-### Tests with Coverage
-
-```bash
-# Run with coverage
-pytest --cov
-
-# Generate HTML report
-pytest --cov --cov-report=html
-
-# Or via Makefile
-make test-cov
-```
-
-HTML report will be available at `htmlcov/index.html`
-
-### pytest Markers
-
-```bash
-# Only unit tests
-pytest -m unit
-
-# Only integration tests
-pytest -m integration
-
-# Without slow tests
-pytest -m "not slow"
-```
-
-### Parallel Test Execution
-
-```bash
-# Auto-detect number of processes
-pytest -n auto
-
-# Specific number of processes
-pytest -n 4
-```
-
-## 🛠️ Development Tools
-
-### Ruff (Linter & Formatter)
-
-#### Code Checking
-
-```bash
-# Check entire project
-ruff check .
-
-# Check specific file
-ruff check src/apps/example_app/models.py
-
-# Or via Makefile
-make lint
-```
-
-#### Code Formatting
-
-```bash
-# Format entire project
-ruff format .
-
-# Format specific file
-ruff format src/apps/example_app/models.py
-
-# Auto-fix errors
-ruff check --fix .
-
-# Or via Makefile
-make format
-```
-
-#### Ruff Configuration
-
-Configuration is in `pyproject.toml`:
-
-```toml
-[tool.ruff]
-line-length = 100
-target-version = "py311"
-
-[tool.ruff.lint]
-select = ["E", "W", "F", "I", "B", "C4", "UP", "ARG", "SIM", "DJ"]
-ignore = ["E501", "B008", "DJ001"]
-```
-
-### Pre-commit
-
-Pre-commit runs automatically before each commit.
-
-### What Pre-commit Does
-
-Pre-commit runs the following checks automatically:
-
-1. **Code Quality Checks** (from pre-commit-hooks):
-   - Remove trailing whitespace
-   - Fix end of file
-   - Check YAML syntax
-   - Check for large files (>1MB)
-   - Check JSON and TOML syntax
-   - Check for merge conflicts
-   - Check for debug statements
-   - Normalize line endings
-
-2. **Ruff Linter and Formatter**:
-   - Check code style (PEP 8)
-   - Find potential bugs
-   - Sort imports
-   - Format code automatically
-   - Fix simple issues
-
-3. **Type Checking** (mypy):
-   - Check type hints
-   - Find type-related errors
-
-4. **Django Checks**:
-   - Run `python manage.py check`
-   - Check for missing migrations
-
-### Installation
-
-Pre-commit is installed automatically when you run:
-
-```bash
-make dev-install
-```
-
-Or manually:
-
-```bash
-uv pip install -e ".[dev]"
-pre-commit install
-```
-
-**Important**: Pre-commit requires Git to be initialized:
-
-```bash
-# If you get an error about Git not being initialized:
-git init
-git add .
-pre-commit install
-```
-
-### Manual Run
-
-Run pre-commit manually without committing:
-
-```bash
-# Run on all files
-pre-commit run --all-files
-
-# Run on staged files only
-pre-commit run
-
-# Run specific hook
-pre-commit run ruff --all-files
-pre-commit run ruff-format --all-files
-```
-
-### Pre-commit Workflow
-
-```bash
-# 1. Make changes to your code
-nano src/apps/myapp/models.py
-
-# 2. Stage changes
-git add .
-
-# 3. Try to commit (pre-commit runs automatically)
-git commit -m "Add new model"
-
-# Pre-commit output:
-# Trim Trailing Whitespace...........................Passed
-# Fix End of Files....................................Passed
-# Check Yaml..........................................Passed
-# Ruff................................................Failed  # ← Code needs fixing
-# - hook id: ruff
-# - exit code: 1
-#
-# Found 3 errors:
-# - apps/myapp/models.py:10:5: F401 'datetime' imported but unused
-# - apps/myapp/models.py:15:80: E501 line too long (95 > 100)
-
-# 4. Pre-commit may auto-fix some issues
-# Check what was changed:
-git diff
-
-# 5. Stage auto-fixed files
-git add .
-
-# 6. Commit again
-git commit -m "Add new model"
-
-# Now it passes:
-# Trim Trailing Whitespace...........................Passed
-# Ruff................................................Passed
-# ✓ All checks passed!
-```
-
-### Skipping Pre-commit (Not Recommended)
-
-If you need to commit without running pre-commit (emergency only):
-
-```bash
-git commit -m "Emergency fix" --no-verify
-```
-
-**Warning**: Only use `--no-verify` in emergencies. Skipping checks can introduce bugs and style inconsistencies.
-
-### Update Hooks
-
-Update to the latest versions of pre-commit hooks:
-
-```bash
-pre-commit autoupdate
-```
-
-This updates versions in `.pre-commit-config.yaml`.
-
-### Configuration
-
-Pre-commit is configured in `.pre-commit-config.yaml`:
-
-```yaml
-repos:
-  - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.5.0
-    hooks:
-      - id: trailing-whitespace
-      - id: end-of-file-fixer
-      - id: check-yaml
-      # ... more hooks
-
-  - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.1.15
-    hooks:
-      - id: ruff
-        args: [--fix, --exit-non-zero-on-fix]
-      - id: ruff-format
-
-  - repo: local
-    hooks:
-      - id: django-check
-        name: Django System Check
-        entry: python src/manage.py check
-        language: system
-        pass_filenames: false
-```
-
-### Customizing Pre-commit
-
-#### Disable Specific Hooks
-
-Edit `.pre-commit-config.yaml` and comment out hooks:
-
-```yaml
-hooks:
-  - id: trailing-whitespace
-  # - id: check-yaml  # Disabled
-  - id: end-of-file-fixer
-```
-
-#### Add Custom Hooks
-
-Add your own checks:
-
-```yaml
-  - repo: local
-    hooks:
-      - id: check-env-file
-        name: Check .env file exists
-        entry: bash -c 'test -f .env || (echo ".env file missing!" && exit 1)'
-        language: system
-        pass_filenames: false
-
-      - id: run-security-check
-        name: Security Check
-        entry: bandit -r src/apps/
-        language: system
-        pass_filenames: false
-```
-
-#### Skip Hooks for Specific Files
-
-```yaml
-  - id: ruff
-    exclude: ^migrations/
-```
-
-### Troubleshooting
-
-#### "git failed. Is it installed?"
-
-**Problem**: Pre-commit requires Git
-**Solution**:
-```bash
-git init
-git add .
-pre-commit install
-```
-
-#### "hook failed" errors
-
-**Problem**: Code doesn't meet standards
-**Solution**:
-1. Review the error message
-2. Fix the code manually
-3. Or let pre-commit auto-fix with `--fix`
-4. Stage changes: `git add .`
-5. Try commit again
-
-#### Hooks are slow
-
-**Problem**: Pre-commit takes too long
-**Solution**:
-- Run only on changed files (default)
-- Skip mypy for faster commits:
-  ```bash
-  SKIP=mypy git commit -m "Quick fix"
-  ```
-- Or configure to skip in `.pre-commit-config.yaml`
-
-#### Want to commit anyway
-
-**Solution**: Use `--no-verify` (emergency only):
-```bash
-git commit -m "Emergency" --no-verify
-```
-
-### Best Practices
-
-1. **Let pre-commit auto-fix**: Don't fight it, let it format your code
-2. **Run manually before committing**: `pre-commit run --all-files`
-3. **Update regularly**: `pre-commit autoupdate` monthly
-4. **Don't skip**: Using `--no-verify` should be rare
-5. **Fix root causes**: If a check always fails, fix your code or update config
-6. **Review auto-fixes**: Check `git diff` after pre-commit runs
-
-This ensures code quality even if someone bypasses local pre-commit hooks.
-
-### Common Pre-commit Hooks
-
-| Hook | Purpose | Auto-fix |
-|------|---------|----------|
-| `trailing-whitespace` | Remove trailing spaces | ✅ Yes |
-| `end-of-file-fixer` | Ensure newline at EOF | ✅ Yes |
-| `check-yaml` | Validate YAML syntax | ❌ No |
-| `check-json` | Validate JSON syntax | ❌ No |
-| `ruff` | Lint Python code | ✅ Partial |
-| `ruff-format` | Format Python code | ✅ Yes |
-| `mypy` | Type checking | ❌ No |
-| `django-check` | Django system check | ❌ No |
-
-#### Manual Run
-
-```bash
-# Run for all files
-pre-commit run --all-files
-
-# Run for staged files
-pre-commit run
-```
-
-#### Update Hooks
-
-```bash
-pre-commit autoupdate
-```
-
-#### Skip pre-commit (not recommended)
-
-```bash
-git commit -m "message" --no-verify
-```
-
-### Django Management Commands
-
-#### Migrations
-
-```bash
-cd src
-
-# Create migrations
-python manage.py makemigrations
-
-# Apply migrations
-python manage.py migrate
-
-# View migrations
-python manage.py showmigrations
-
-# Rollback migration
-python manage.py migrate app_name migration_name
-```
-
-#### Custom Migration Modules
-
-If you need to use custom migration directories (e.g., for different environments or splitting migrations), configure `MIGRATION_MODULES` in `config/settings.py`:
-
-```python
-# config/settings.py
-
-MIGRATION_MODULES = {
-    # Register custom migration modules here
-    # Format: "app_name": "path.to.custom.migrations"
-
-    # Example 1: Custom migrations directory
-    "myapp": "apps.myapp.migrations_custom",
-
-    # Example 2: Separate migrations for different environments
-    "orders": "apps.orders.migrations_production",
-
-    # Example 3: Disable migrations for specific app (useful for testing)
-    "third_party_app": None,
-}
-```
-
-**Use Cases:**
-
-1. **Custom Migration Location:**
-   ```python
-   MIGRATION_MODULES = {
-       "books": "apps.books.migrations_custom",
-   }
+2. **Navigate to the folder where you want to save the project:**
+   ```bash
+   cd Desktop
    ```
-   Structure:
+   *(This example will save the project to your Desktop)*
+
+3. **Download the project:**
+   ```bash
+   git clone <repository-link>
    ```
-   apps/books/
-   ├── migrations_custom/
-   │   ├── __init__.py
-   │   ├── 0001_initial.py
-   │   └── 0002_add_isbn.py
+   *(Replace `<repository-link>` with the actual link provided to you)*
+
+4. **Navigate to the project folder:**
+   ```bash
+   cd fitness-club-membership
    ```
+   *(The folder name may differ - use your project's name)*
 
-2. **Environment-Specific Migrations:**
-   ```python
-   import os
+## Configuration Before Launch
 
-   if os.getenv("ENVIRONMENT") == "production":
-       MIGRATION_MODULES = {
-           "myapp": "apps.myapp.migrations_production",
-       }
-   else:
-       MIGRATION_MODULES = {
-           "myapp": "apps.myapp.migrations_dev",
-       }
+### Create a Secret Data File
+
+There's a file called `.env.sample` in the project folder - this is a template for your settings.
+
+1. **Copy the `.env.sample` file and name the copy `.env`:**
+   - **Windows:** In File Explorer, find the file, right-click → Copy → Paste → Rename to `.env`
+   - **Mac/Linux:** In terminal, execute:
+     ```bash
+     cp .env.sample .env
+     ```
+
+2. **Open the `.env` file in a text editor** (Notepad, TextEdit, VS Code)
+
+3. **Fill in the required data:**
+   - `STRIPE_SECRET_KEY` - your Stripe API key (payment system)
+   - `TELEGRAM_BOT_TOKEN` - your Telegram bot token
+   - `TELEGRAM_CHAT_ID` - chat ID for receiving notifications
+   - Other settings can be left as default
+
+### How to Get Required Credentials
+
+#### Stripe Setup:
+1. Go to [https://stripe.com](https://stripe.com) and create an account
+2. Select a test country (e.g., USA) - **use test mode only**
+3. Navigate to Developers → API Keys
+4. Copy the "Secret key" (starts with `sk_test_`)
+5. **Important:** You don't need to activate your account; work with test data only
+
+#### Telegram Bot Setup:
+1. Open Telegram and search for [@BotFather](https://t.me/botfather)
+2. Send `/newbot` command
+3. Follow instructions to create your bot
+4. Copy the token provided (looks like `123456789:ABCdefGHIjklMNOpqrsTUVwxyz`)
+5. Create a group chat and add your bot to it
+6. To get the chat ID, send a message to the group, then visit:
    ```
-
-3. **Disable Migrations (Testing):**
-   ```python
-   # Useful for testing with third-party apps
-   if TESTING:
-       MIGRATION_MODULES = {
-           "third_party_app": None,
-       }
+   https://api.telegram.org/bot<YOUR_BOT_TOKEN>/getUpdates
    ```
+   Replace `<YOUR_BOT_TOKEN>` with your actual token
+7. Look for `"chat":{"id":-123456789}` in the response
 
-**Creating Custom Migration Directory:**
+## Running the Project
 
-```bash
-# 1. Create custom migrations directory
-mkdir -p src/apps/myapp/migrations_custom
-touch src/apps/myapp/migrations_custom/__init__.py
+### Make Sure Docker is Running
 
-# 2. Configure in settings.py
-# MIGRATION_MODULES = {"myapp": "apps.myapp.migrations_custom"}
+1. Open Docker Desktop
+2. Wait until the program fully starts (green icon at the bottom)
 
-# 3. Create migrations
-cd src
-python manage.py makemigrations myapp
-```
+### Launch the Project
 
-#### Collect Static Files
+In the terminal, while in the project folder, execute:
 
 ```bash
-cd src
-python manage.py collectstatic
-```
-
-#### Create App
-
-```bash
-cd src
-python manage.py startapp new_app apps/new_app
-```
-
-#### Django Check
-
-```bash
-cd src
-python manage.py check
-
-# Or via Makefile
-make check
-```
-
-## 🐳 Docker
-
-### Start Services
-
-```bash
-# Start in background
-docker-compose up -d
-
-# Start with logs
 docker-compose up
+```
 
-# Stop
+**What will happen:**
+- Docker will start downloading necessary components (this may take 5-10 minutes on first launch)
+- You'll see a lot of text in the terminal - this is normal
+- When everything is ready, you'll see messages indicating successful launch
+
+### Verify It's Working
+
+Open your browser and go to:
+```
+http://localhost:8000
+```
+
+If you see the API page - congratulations, everything works! 🎉
+
+## How to Stop the Project
+
+1. Return to the terminal window where the project is running
+2. Press `Ctrl + C` (on Mac also `Ctrl + C`)
+3. Wait for all services to fully stop
+
+Alternatively, you can execute:
+```bash
 docker-compose down
-
-# Stop with volume removal
-docker-compose down -v
 ```
 
-### View Logs
+## Useful Commands
 
+### Restart the Project from Scratch
 ```bash
-# All services
-docker-compose logs -f
-
-# Specific service
-docker-compose logs -f db
-docker-compose logs -f redis
+docker-compose down
+docker-compose up --build
 ```
 
-### Execute Commands in Container
-
+### View Logs (if something isn't working)
 ```bash
-# PostgreSQL
-docker-compose exec db psql -U django_user -d django_db
-
-# Redis
-docker-compose exec redis redis-cli
+docker-compose logs
 ```
 
-## 📝 Makefile Commands
-
-The project includes a Makefile for automating routine tasks:
-
+### View Logs for a Specific Service
 ```bash
-make help          # Show all available commands
-make install       # Install production dependencies
-make dev-install   # Install dev dependencies + pre-commit
-make migrate       # Run migrations
-make test          # Run tests
-make test-cov      # Tests with coverage
-make lint          # Check code
-make format        # Format code
-make check         # Django system check
-make clean         # Clean temporary files
-make run           # Start dev server
-make shell         # Open Django shell
+docker-compose logs <service-name>
+```
+Where `<service-name>` can be: `web`, `db`, `redis`, `celery`, etc.
+
+### Access the Database
+PostgreSQL database is accessible on port `5432`
+
+## Troubleshooting
+
+### Problem: "docker: command not found"
+**Solution:** Docker is not installed or not running. Check if Docker Desktop is installed and running.
+
+### Problem: "Port already in use"
+**Solution:** The port is already being used by another program. Stop other programs or change the port in `docker-compose.yml`.
+
+### Problem: Project won't start
+**Solution:**
+1. Make sure the `.env` file is created and filled in
+2. Verify all secret keys are correct
+3. Try restarting Docker Desktop
+4. Execute `docker-compose down` then `docker-compose up --build`
+
+### Problem: Telegram notifications aren't working
+**Solution:**
+1. Check that `TELEGRAM_BOT_TOKEN` is correct
+2. Make sure the bot is added to the chat
+3. Verify `TELEGRAM_CHAT_ID` is correct
+4. Ensure the bot has permission to send messages in the group
+
+### Problem: Stripe payments aren't working
+**Solution:**
+1. Verify you're using the test API key (starts with `sk_test_`)
+2. Check that `STRIPE_SECRET_KEY` in `.env` is correct
+3. Make sure you're using test card numbers from [Stripe's testing documentation](https://stripe.com/docs/testing)
+
+### Problem: Database connection errors
+**Solution:**
+1. Make sure the database container is running: `docker-compose ps`
+2. Check database credentials in `.env` file
+3. Try restarting all containers: `docker-compose restart`
+
+## Accessing API Documentation
+
+After launching the project, Swagger documentation is available at:
+```
+http://localhost:8000/swagger/
 ```
 
-### Detailed Makefile Usage
+Here you can view all available API endpoints and test them.
 
-#### Installation Commands
+## Testing the System
 
-```bash
-# Install only production dependencies
-make install
+### Test Card Numbers (Stripe Test Mode)
 
-# Install development dependencies and setup pre-commit
-make dev-install
-```
+Use these test card numbers to simulate payments:
+- **Successful payment:** `4242 4242 4242 4242`
+- **Declined payment:** `4000 0000 0000 0002`
+- Use any future expiration date, any 3-digit CVC, and any ZIP code
 
-This is equivalent to:
-```bash
-uv pip install -e .                    # make install
-uv pip install -e ".[dev]"             # make dev-install
-pre-commit install                      # make dev-install
-```
+### Sample User Flow
 
-#### Development Commands
+1. Register a new user via `/users/` endpoint
+2. Get authentication token via `/users/token/`
+3. View available membership plans via `/plans/`
+4. Purchase a membership via `/memberships/`
+5. Complete payment through the Stripe checkout URL
+6. Check your Telegram for notification
+7. View your active membership via `/memberships/`
 
-```bash
-# Run development server (localhost:8000)
-make run
+## Technical Stack
 
-# Open Django shell with IPython
-make shell
+- **Backend Framework:** Django & Django REST Framework
+- **Database:** PostgreSQL
+- **Task Queue:** Celery or Django-Q
+- **Message Broker:** Redis
+- **Payment Processing:** Stripe API
+- **Notifications:** Telegram Bot API
+- **Authentication:** JWT (JSON Web Tokens)
+- **Containerization:** Docker & Docker Compose
 
-# Run database migrations
-make migrate
-```
+## Support
 
-Equivalent to:
-```bash
-cd src && python manage.py runserver   # make run
-cd src && python manage.py shell       # make shell
-cd src && python manage.py makemigrations && python manage.py migrate  # make migrate
-```
+If you encounter any problems, reach out to the development team through:
+- GitHub Issues in the project repository
+- Your corporate chat
+- Project documentation
 
-#### Code Quality Commands
+## Important Notes
 
-```bash
-# Check code with ruff (find issues)
-make lint
+- **Test Mode Only:** This project uses Stripe's test mode, so all payments are simulated. No real money will be charged.
+- **Security:** Never commit the `.env` file to version control. It contains sensitive credentials.
+- **Data Privacy:** Keep all user data secure and comply with relevant data protection regulations.
 
-# Format code with ruff (fix issues)
-make format
+## License
 
-# Run Django system checks
-make check
-```
+This project is developed for educational purposes as part of a team project assignment.
 
-Equivalent to:
-```bash
-ruff check .                           # make lint
-ruff format . && ruff check --fix .    # make format
-cd src && python manage.py check && python manage.py makemigrations --check --dry-run  # make check
-```
+---
 
-#### Testing Commands
-
-```bash
-# Run all tests
-make test
-
-# Run tests with coverage report
-make test-cov
-```
-
-Equivalent to:
-```bash
-pytest                                  # make test
-pytest --cov --cov-report=html         # make test-cov
-```
-
-#### Cleanup Commands
-
-```bash
-# Clean temporary files and caches
-make clean
-```
-
-This removes:
-- `__pycache__` directories
-- `.pyc` and `.pyo` files
-- `.pytest_cache`
-- Coverage reports
-- Build artifacts
-
-
-Usage:
-```bash
-make backup
-make restore
-make create-app
-make deploy
-```
-
-## 🔍 Pre-commit Hooks
-
-Pre-commit automatically runs code quality checks before each commit. This ensures that only properly formatted and linted code enters the repository.
-
-## 🔧 IDE Configuration
-
-### PyCharm
-
-1. Open Settings → Project → Python Interpreter
-2. Select `.venv/bin/python`
-3. Tools → External Tools → Add Ruff
-4. Settings → Tools → Python Integrated Tools → Testing → pytest
-
-## 🚀 Creating a New App
-
-```bash
-# 1. Create app
-cd src
-python manage.py startapp my_app apps/my_app
-
-# 2. Add to INSTALLED_APPS (config/settings.py)
-INSTALLED_APPS = [
-    ...
-    "apps.my_app",
-]
-
-# 3. Create structure
-cd apps/my_app
-touch urls.py serializers.py tests.py
-
-# 4. Add URLs (config/urls.py)
-urlpatterns = [
-    ...
-    path("api/v1/my-app/", include("apps.my_app.urls")),
-]
-```
-
-## 📚 Additional Resources
-
-- [Django Documentation](https://docs.djangoproject.com/)
-- [Django REST Framework](https://www.django-rest-framework.org/)
-- [uv Documentation](https://github.com/astral-sh/uv)
-- [Ruff Documentation](https://docs.astral.sh/ruff/)
-- [pytest Documentation](https://docs.pytest.org/)
-- [pre-commit Documentation](https://pre-commit.com/)
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit changes (`git commit -m 'Add amazing feature'`)
-4. Push to branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
-## 📄 License
-
-This project is licensed under the MIT License.
+**Version:** 1.0.0
+**Last Updated:** January 2026
+**Maintained by:** Your Development Team

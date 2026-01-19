@@ -47,10 +47,6 @@ htmlcov/
 .pytest_cache/
 .tox/
 
-# Documentation
-*.md
-docs/
-
 # CI/CD
 .github/
 .gitlab-ci.yml
