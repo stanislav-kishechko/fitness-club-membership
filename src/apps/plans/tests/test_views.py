@@ -28,32 +28,38 @@ class MembershipPlanViewSetTest(APITestCase):
             tier=MembershipPlan.Tier.BASIC,
         )
 
-    def test_list_plans_anonymous_unauthorized(self):
+    def test_list_plans_anonymous_allowed(self):
         response = self.client.get(reverse("plans:plans-list"))
-        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-    def test_list_plans_non_staff_forbidden(self):
+    def test_list_plans_non_staff_allowed(self):
         self.client.force_authenticate(self.user)
         response = self.client.get(reverse("plans:plans-list"))
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_list_plans_staff_allowed(self):
         self.client.force_authenticate(self.staff_user)
         response = self.client.get(reverse("plans:plans-list"))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-    def test_retrieve_plan_anonymous_unauthorized(self):
-        response = self.client.get(reverse("plans:plans-detail", args=[self.plan.id]))
-        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+    def test_retrieve_plan_anonymous_allowed(self):
+        response = self.client.get(
+            reverse("plans:plans-detail", args=[self.plan.id])
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-    def test_retrieve_plan_non_staff_forbidden(self):
+    def test_retrieve_plan_non_staff_allowed(self):
         self.client.force_authenticate(self.user)
-        response = self.client.get(reverse("plans:plans-detail", args=[self.plan.id]))
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        response = self.client.get(
+            reverse("plans:plans-detail", args=[self.plan.id])
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_retrieve_plan_staff_allowed(self):
         self.client.force_authenticate(self.staff_user)
-        response = self.client.get(reverse("plans:plans-detail", args=[self.plan.id]))
+        response = self.client.get(
+            reverse("plans:plans-detail", args=[self.plan.id])
+        )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_create_plan_anonymous_unauthorized(self):
